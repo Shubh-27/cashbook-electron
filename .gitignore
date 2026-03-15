@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+release/
+out/
+
+# Project specific
+ui/
+resources/api/
+
+# IDE and System
+.vscode/
+.idea/
+.DS_Store
+*.log
+
