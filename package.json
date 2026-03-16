@@ -8,9 +8,10 @@
     "dist": "electron-builder"
   },
   "build": {
-    "appId": "com.bankapp.manager",
-    "productName": "Bank Manager",
+    "appId": "com.cashbook.manager",
+    "productName": "CashBook",
     "copyright": "Copyright © 2026",
+    "asar": true,
     "win": {
       "target": [
         {
@@ -21,6 +22,28 @@
         }
       ],
       "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.finance"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,
@@ -49,5 +72,7 @@
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
   }
 }
