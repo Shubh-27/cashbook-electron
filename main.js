@@ -8,7 +8,7 @@ const http = require('http');
 let apiProcess = null;
 let mainWindow = null;
 
-const API_PORT = 5000;
+const API_PORT = 5050;
 const API_URL = `http://localhost:${API_PORT}`;
 const isDev = !app.isPackaged;
 
@@ -23,7 +23,8 @@ function getApiExecutablePath() {
     return null;
   }
   // In production, the API exe is placed in resources/api/ by electron-builder.
-  return path.join(process.resourcesPath, 'api', 'backend.exe');
+  const exeName = process.platform === 'win32' ? 'backend.exe' : 'backend';
+  return path.join(process.resourcesPath, 'api', exeName);
 }
 
 function startApi() {
