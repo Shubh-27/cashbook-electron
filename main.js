@@ -1,7 +1,8 @@
 'use strict';
 
-const { app, BrowserWindow, dialog } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const { spawn } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const http = require('http');
 
@@ -136,6 +137,62 @@ function createWindow() {
 }
 
 // ---------------------------------------------------------------------------
+// Auto-Updater logic
+// ---------------------------------------------------------------------------
+
+function setupAutoUpdater() {
+  // We can customize the logger if needed
+  // autoUpdater.logger = require('electron-log');
+  // autoUpdater.logger.transports.file.level = 'info';
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('[Updater] Checking for update...');
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('[Updater] Update available:', info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-available', info);
+    }
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('[Updater] Update not available.');
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('[Updater] Error:', err);
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    console.log('[Updater]', log_message);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-download-progress', progressObj);
+    }
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('[Updater] Update downloaded');
+    if (mainWindow) {
+      mainWindow.webContents.send('update-downloaded', info);
+    }
+  });
+
+  ipcMain.handle('check-for-updates', async () => {
+    return await autoUpdater.checkForUpdatesAndNotify();
+  });
+
+  ipcMain.handle('quit-and-install', () => {
+    // Ensure the API is stopped before updating
+    stopApi();
+    autoUpdater.quitAndInstall();
+  });
+}
+
+// ---------------------------------------------------------------------------
 // App lifecycle
 // ---------------------------------------------------------------------------
 
@@ -152,8 +209,13 @@ app.whenReady().then(async () => {
     app.quit();
     return;
   }
-
   createWindow();
+  setupAutoUpdater();
+
+  // Check for updates automatically in production
+  if (!isDev) {
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

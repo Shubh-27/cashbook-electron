@@ -7,11 +7,22 @@
     "start": "electron .",
     "dist": "electron-builder"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shubh-27/cashbook.git"
+  },
   "build": {
     "appId": "com.cashbook.manager",
     "productName": "CashBook",
     "copyright": "Copyright © 2026",
     "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Shubh-27",
+        "repo": "cashbook"
+      }
+    ],
     "win": {
       "target": [
         {
@@ -74,5 +85,6 @@
     "electron-builder": "^25.1.8"
   },
   "dependencies": {
+    "electron-updater": "^6.8.3"
   }
 }
