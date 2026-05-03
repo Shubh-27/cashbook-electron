@@ -120,6 +120,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+    icon: path.join(__dirname, '..', 'frontend', 'public', 'logo.svg'),
   });
 
   if (isDev) {
@@ -141,9 +142,8 @@ function createWindow() {
 // ---------------------------------------------------------------------------
 
 function setupAutoUpdater() {
-  // We can customize the logger if needed
-  // autoUpdater.logger = require('electron-log');
-  // autoUpdater.logger.transports.file.level = 'info';
+  autoUpdater.autoDownload = true;
+  autoUpdater.allowPrerelease = false;
 
   autoUpdater.on('checking-for-update', () => {
     console.log('[Updater] Checking for update...');
@@ -162,6 +162,9 @@ function setupAutoUpdater() {
 
   autoUpdater.on('error', (err) => {
     console.error('[Updater] Error:', err);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-error', err.message || 'Unknown error');
+    }
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
