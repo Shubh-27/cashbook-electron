@@ -39,11 +39,18 @@ function startApi() {
 
   console.log('[Electron] Starting API:', exePath);
 
+  const env = { ...process.env };
+  if (process.env.PORTABLE_EXECUTABLE_DIR) {
+    env.DATABASE_PATH = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'cashbook.db');
+    console.log('[Electron] Portable mode detected. Storing DB in:', env.DATABASE_PATH);
+  }
+
   apiProcess = spawn(exePath, [`--urls=${API_URL}`], {
     detached: false,
     // Hide the console window in production
     windowsHide: true,
     stdio: ['ignore', 'pipe', 'pipe'],
+    env: env,
   });
 
   apiProcess.stdout.on('data', (data) => {
@@ -215,8 +222,8 @@ app.whenReady().then(async () => {
   createWindow();
   setupAutoUpdater();
 
-  // Check for updates automatically in production
-  if (!isDev) {
+  // Check for updates automatically in production or if testing
+  if (!isDev || process.env.TEST_UPDATER === 'true') {
     autoUpdater.checkForUpdatesAndNotify();
   }
 
