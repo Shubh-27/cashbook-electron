@@ -16,3 +16,14 @@ resources/api/
 .DS_Store
 *.log
 dev-app-update.yml
+
+# Local data and secrets
+*.db
+*.db-shm
+*.db-wal
+*.bak
+.env*
+*.pfx
+*.p12
+*.key
+*.pem

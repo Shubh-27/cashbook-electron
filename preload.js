@@ -1,15 +1,20 @@
 // preload.js — runs in the renderer process before any page scripts.
 // Uses contextBridge to safely expose Node/Electron APIs to the renderer.
-// Currently exposes nothing — the React app communicates with the API
-// exclusively via standard HTTP fetch calls to http://localhost:5050.
 
 const { contextBridge, ipcRenderer } = require('electron');
 
+const UPDATER_CHANNEL = 'updater:state';
+
 contextBridge.exposeInMainWorld('electronAPI', {
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
-  onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (_event, value) => callback(value)),
-  onUpdateDownloaded: (callback) => ipcRenderer.on('update-downloaded', (_event, value) => callback(value)),
-  onDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', (_event, value) => callback(value)),
-  onUpdateError: (callback) => ipcRenderer.on('update-error', (_event, value) => callback(value)),
+  getVersion: () => ipcRenderer.invoke('updater:get-version'),
+  checkForUpdates: () => ipcRenderer.invoke('updater:check'),
+  installUpdate: () => ipcRenderer.invoke('updater:install'),
+  openReleasePage: (url) => ipcRenderer.invoke('updater:open-release-page', url),
+  onUpdateState: (callback) => {
+    const listener = (_event, payload) => callback(payload);
+    ipcRenderer.on(UPDATER_CHANNEL, listener);
+    return () => {
+      ipcRenderer.removeListener(UPDATER_CHANNEL, listener);
+    };
+  },
 });
