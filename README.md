@@ -107,33 +107,43 @@ Packaging is powered by `electron-builder`. During the build process, the compil
 
 ### Windows Targets (NSIS & Portable)
 
-To build both the NSIS installer and the standalone Portable executable:
+To build the NSIS installer (default published target):
 
 ```bash
 npm run dist
 ```
-*or:*
+
+To build the standalone Portable executable separately (portable builds cannot auto-update):
+
 ```bash
-npx electron-builder --win
+npm run dist:portable
 ```
 
 **Artifacts created in `dist/`:**
 - `CashBook Setup <version>.exe` (Interactive NSIS installer with desktop/start menu shortcuts)
-- `CashBook <version>.exe` (Single-file Portable executable)
+- `CashBook <version>.exe` (Single-file Portable executable, when using `dist:portable`)
 - `latest.yml` & `*.blockmap` (Auto-update metadata)
 
 ### macOS Targets (DMG & ZIP)
 
-To build the macOS DMG and ZIP distribution files:
+To build the macOS arm64 DMG and ZIP distribution files:
 
 ```bash
-npx electron-builder --mac
+npx electron-builder --mac --arm64
 ```
 
 **Artifacts created in `dist/`:**
-- `CashBook-<version>.dmg` (macOS Drag-and-Drop installer)
-- `CashBook-<version>-mac.zip` (macOS archive)
-- `latest-mac.yml` (Auto-update metadata)
+- `CashBook-<version>-arm64.dmg` (macOS Drag-and-Drop installer)
+- `CashBook-<version>-arm64.zip` (macOS archive for auto-updates)
+- `latest-mac.yml` & `*.blockmap` (Auto-update metadata)
+
+### Enabling macOS Code Signing & Notarization
+
+By default (`MAC_SIGNING` not set to `true`), macOS builds are unsigned (`identity: null`). When you get an Apple Developer ID:
+
+1. Add the repository secrets in GitHub: `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, and `APPLE_TEAM_ID`.
+2. Set `MAC_SIGNING=true` in CI (as a repository variable `MAC_SIGNING=true` or in `.github/workflows/release.yml`).
+3. Set `MAC_SIGNED = true` in `electron/main.js`.
 
 ---
 
